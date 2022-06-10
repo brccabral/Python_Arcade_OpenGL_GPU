@@ -1,6 +1,7 @@
 """
 Example showing how to create particle explosions via the GPU.
 """
+from abc import ABC
 from array import array
 from dataclasses import dataclass
 import arcade
@@ -26,6 +27,24 @@ class Burst:
     start_time: float
 
 
+class SpeedFormat(ABC):
+    @staticmethod
+    def get_speed():
+        return 0
+
+
+class SpeedUniform(SpeedFormat):
+    @staticmethod
+    def get_speed():
+        return random.uniform(0.0, 0.3)
+
+
+class SpeedGaussian(SpeedFormat):
+    @staticmethod
+    def get_speed():
+        return abs(random.gauss(0, 1)) * 0.5
+
+
 class MyWindow(arcade.Window):
     """Main window"""
 
@@ -40,6 +59,8 @@ class MyWindow(arcade.Window):
         )
 
         self.ctx.enable_only()
+
+        self.speed_formats = [SpeedUniform, SpeedGaussian]
 
     def on_draw(self):
         """Draw everything"""
@@ -63,12 +84,13 @@ class MyWindow(arcade.Window):
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         """User clicks mouse"""
 
-        def _gen_initial_data(initial_x, initial_y):
+        def _gen_initial_data(initial_x, initial_y, speed_choice: SpeedFormat):
             """Generate data for each particle"""
 
             for i in range(PARTICLE_COUNT):
                 angle = random.uniform(0, 2 * math.pi)
-                speed = random.uniform(0.0, 0.3)
+                speed = speed_choice.get_speed()
+
                 dx = math.sin(angle) * speed
                 dy = math.cos(angle) * speed
                 yield initial_x
@@ -82,7 +104,8 @@ class MyWindow(arcade.Window):
         y2 = y / self.height * 2.0 - 1.0
 
         # Get initial particle data
-        initial_data = _gen_initial_data(x2, y2)
+        speed_choice = random.choice(self.speed_formats)
+        initial_data = _gen_initial_data(x2, y2, speed_choice)
 
         # Create a buffer with that data
         buffer = self.ctx.buffer(data=array("f", initial_data))
