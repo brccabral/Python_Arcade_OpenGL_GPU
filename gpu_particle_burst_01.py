@@ -15,6 +15,8 @@ SCREEN_HEIGHT = 768
 SCREEN_TITLE = "GPU Particle Explosion"
 
 PARTICLE_COUNT = 300
+MIN_FADE_TIME = 2.25
+MAX_FADE_TIME = 4.5
 
 
 @dataclass
@@ -58,7 +60,7 @@ class MyWindow(arcade.Window):
             fragment_shader="fragment_shader.glsl",
         )
 
-        self.ctx.enable_only()
+        self.ctx.enable_only(self.ctx.BLEND)
 
         self.speed_formats = [SpeedUniform, SpeedGaussian]
 
@@ -97,6 +99,7 @@ class MyWindow(arcade.Window):
                 red = random.uniform(0.5, 1.0)
                 green = random.uniform(0, red)
                 blue = 0
+                fade_rate = random.uniform(1 / MAX_FADE_TIME, 1 / MIN_FADE_TIME)
 
                 yield initial_x
                 yield initial_y
@@ -105,6 +108,7 @@ class MyWindow(arcade.Window):
                 yield red
                 yield green
                 yield blue
+                yield fade_rate
 
         # Recalculate the coordinates from pixels to the OpenGL system with
         # 0, 0 at the center.
@@ -120,7 +124,7 @@ class MyWindow(arcade.Window):
 
         # Create a buffer description that says how the buffer data is formatted.
         buffer_description = arcade.gl.BufferDescription(
-            buffer, "2f 2f 3f", ["in_pos", "in_vel", "in_color"]
+            buffer, "2f 2f 3f f", ["in_pos", "in_vel", "in_color", "in_fade_rate"]
         )
 
         # Create our Vertex Attribute Object

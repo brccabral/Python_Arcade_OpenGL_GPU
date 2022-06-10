@@ -12,13 +12,20 @@ in vec2 in_vel;
 // Color of particle
 in vec3 in_color;
 
+// Fade rate
+in float in_fade_rate;
+
 // Output the color to the fragment shader
 out vec4 color;
 
 void main() {
 
+    // Calculate alpha based on time and fade rate
+    float alpha = 1.0 - (in_fade_rate * time);
+    if(alpha < 0.0) alpha = 0;
+
     // Set the RGBA color
-    color = vec4(in_color[0], in_color[1], in_color[2], 1);
+    color = vec4(in_color[0], in_color[1], in_color[2], alpha);
 
     // Calculate a new position
     vec2 new_pos = in_pos + (time * in_vel);
