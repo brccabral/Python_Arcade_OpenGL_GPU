@@ -80,8 +80,15 @@ class MyWindow(arcade.Window):
             burst.vao.render(self.program, mode=self.ctx.POINTS)
 
     def on_update(self, dt):
-        """Update everything"""
-        pass
+        """Update game"""
+
+        # Create a copy of our list, as we can't modify a list while iterating
+        # it. Then see if any of the items have completely faded out and need
+        # to be removed.
+        temp_list = self.burst_list.copy()
+        for burst in temp_list:
+            if time.time() - burst.start_time > MAX_FADE_TIME:
+                self.burst_list.remove(burst)
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         """User clicks mouse"""
