@@ -93,10 +93,18 @@ class MyWindow(arcade.Window):
 
                 dx = math.sin(angle) * speed
                 dy = math.cos(angle) * speed
+
+                red = random.uniform(0.5, 1.0)
+                green = random.uniform(0, red)
+                blue = 0
+
                 yield initial_x
                 yield initial_y
                 yield dx
                 yield dy
+                yield red
+                yield green
+                yield blue
 
         # Recalculate the coordinates from pixels to the OpenGL system with
         # 0, 0 at the center.
@@ -112,7 +120,7 @@ class MyWindow(arcade.Window):
 
         # Create a buffer description that says how the buffer data is formatted.
         buffer_description = arcade.gl.BufferDescription(
-            buffer, "2f 2f", ["in_pos", "in_vel"]
+            buffer, "2f 2f 3f", ["in_pos", "in_vel", "in_color"]
         )
 
         # Create our Vertex Attribute Object
