@@ -5,10 +5,14 @@ from array import array
 from dataclasses import dataclass
 import arcade
 import arcade.gl
+import random
+import time
 
 SCREEN_WIDTH = 1024
 SCREEN_HEIGHT = 768
 SCREEN_TITLE = "GPU Particle Explosion"
+
+PARTICLE_COUNT = 300
 
 
 @dataclass
@@ -17,6 +21,8 @@ class Burst:
 
     buffer: arcade.gl.Buffer
     vao: arcade.gl.Geometry
+
+    start_time: float
 
 
 class MyWindow(arcade.Window):
@@ -43,6 +49,8 @@ class MyWindow(arcade.Window):
 
         # Loop through each burst
         for burst in self.burst_list:
+            # Set the uniform data
+            self.program["time"] = time.time() - burst.start_time
 
             # Render the burst
             burst.vao.render(self.program, mode=self.ctx.POINTS)
@@ -56,8 +64,14 @@ class MyWindow(arcade.Window):
 
         def _gen_initial_data(initial_x, initial_y):
             """Generate data for each particle"""
-            yield initial_x
-            yield initial_y
+
+            for i in range(PARTICLE_COUNT):
+                dx = random.uniform(-0.2, 0.2)
+                dy = random.uniform(-0.2, 0.2)
+                yield initial_x
+                yield initial_y
+                yield dx
+                yield dy
 
         # Recalculate the coordinates from pixels to the OpenGL system with
         # 0, 0 at the center.
@@ -71,12 +85,16 @@ class MyWindow(arcade.Window):
         buffer = self.ctx.buffer(data=array("f", initial_data))
 
         # Create a buffer description that says how the buffer data is formatted.
-        buffer_description = arcade.gl.BufferDescription(buffer, "2f", ["in_pos"])
+        buffer_description = arcade.gl.BufferDescription(
+            buffer, "2f 2f", ["in_pos", "in_vel"]
+        )
+
         # Create our Vertex Attribute Object
         vao = self.ctx.geometry([buffer_description])
 
         # Create the Burst object and add it to the list of bursts
-        burst = Burst(buffer=buffer, vao=vao)
+        burst = Burst(buffer=buffer, vao=vao, start_time=time.time())
+
         self.burst_list.append(burst)
 
 
