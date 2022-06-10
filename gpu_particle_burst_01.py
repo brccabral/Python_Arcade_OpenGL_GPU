@@ -7,6 +7,7 @@ import arcade
 import arcade.gl
 import random
 import time
+import math
 
 SCREEN_WIDTH = 1024
 SCREEN_HEIGHT = 768
@@ -66,8 +67,10 @@ class MyWindow(arcade.Window):
             """Generate data for each particle"""
 
             for i in range(PARTICLE_COUNT):
-                dx = random.uniform(-0.2, 0.2)
-                dy = random.uniform(-0.2, 0.2)
+                angle = random.uniform(0, 2 * math.pi)
+                speed = random.uniform(0.0, 0.3)
+                dx = math.sin(angle) * speed
+                dy = math.cos(angle) * speed
                 yield initial_x
                 yield initial_y
                 yield dx
